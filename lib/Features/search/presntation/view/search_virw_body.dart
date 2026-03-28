@@ -1,6 +1,9 @@
 import 'package:bookly/core/utils/styles.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../home/presntation/manger/search_dart_cubit.dart';
+import '../../../home/presntation/manger/search_dart_state.dart';
 import '../../../home/presntation/view/widgets/b estsellerlistviewitem.dart';
 import 'custom_search_text_fild.dart';
 
@@ -12,7 +15,9 @@ class  SearchVirwBody extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 30),
       child: Column(
-        children: [CustomSearchTixtField (),
+
+
+        children: [CustomSearchTextField(),
           const SizedBox(
             height: 16,
           ),Text(" Search Result",style: Styles.textstyle18),
@@ -29,16 +34,39 @@ class SearchResultListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
+    return BlocBuilder<SearchCubit, SearchState>(
+      builder: (context, state) {
+
+        if (state is SearchLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
 
-      padding: EdgeInsets.zero,
-      itemCount: 10,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: BestSellerListViewItem(),
-        );
+        else if (state is SearchFailure) {
+          return Center(child: Text(state.errMessage));
+        }
+
+
+        else if (state is SearchSuccess) {
+          return ListView.builder(
+            itemCount: state.books.length,
+            itemBuilder: (context, index) {
+              final book = state.books[index];
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: BestSellerListViewItem(
+                  bookModel: book,
+                ),
+              );
+            },
+          );
+        }
+
+
+        else {
+          return const Center(child: Text("Search something..."));
+        }
       },
     );
   }
